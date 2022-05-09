@@ -1,15 +1,7 @@
-# Basic Sample Hardhat Project
+# hardhat
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+npx hardhat compile etc
 
-Try running some of the following tasks:
+forked form qidao
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+todo: create univ2 twap price oracle for sushi pools
