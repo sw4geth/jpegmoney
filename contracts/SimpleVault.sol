@@ -34,6 +34,7 @@ contract SimpleVault {
   function withdraw(uint256 _amount) external {
     require(bal[msg.sender] - debt[msg.sender] <= _amount, "Pay up homeboy!");
     collateral.transferFrom(address(this), msg.sender, _amount);
+    bal[msg.sender] -= _amount;
   }
 
   /*/ view functions /*/
