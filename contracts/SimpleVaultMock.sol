@@ -12,6 +12,7 @@ contract SimpleVault {
   uint256 ethPrice = 2000000000000000000000; /*/ 2000 usd /*/
   uint256 collateralPrice = 500000000000000000; /*/ .5 ether /*/
   uint256 stablePrice = 1000000000000000000; /*/ 1 usd /*/
+  uint256 ltvRatio = 1000000000000000000; /*/ 1, need to figure out this math lol/*/
 
   /*/ accounting logic /*/
 
@@ -20,7 +21,7 @@ contract SimpleVault {
   }
 
   function borrow(uint256 _amount) external {
-    require(bal[msg.sender].mul(collateralPrice).mul(ethPrice).div(stablePrice).sub(debt[msg.sender]) >= _amount, "Cannot borrow more than balance");
+    require(bal[msg.sender].mul(collateralPrice).mul(ethPrice).sub(debt[msg.sender]) >= _amount, "Cannot borrow more than balance");
     debt[msg.sender] += _amount;
   }
 
@@ -29,13 +30,19 @@ contract SimpleVault {
   }
 
   function withdraw(uint256 _amount) external {
-    require(bal[msg.sender] - debt[msg.sender] >= _amount, "Pay up homeboy!");
+    require(quickPrice(bal[msg.sender]) - debt[msg.sender] >= _amount, "Nope");
     bal[msg.sender] -= _amount;
   }
 
   /*/ view functions /*/
+
+
   function getCollateralValue(address _addr) public view returns (uint256){
     return bal[_addr].mul(collateralPrice).mul(ethPrice).div(stablePrice);
+  }
+
+  function quickPrice(uint256 _amount) public view returns (uint256){
+    return _amount.mul(collateralPrice).mul(ethPrice).div(stablePrice);
   }
 
   function getWorth(address _addr) public view returns (uint256) {
@@ -48,6 +55,11 @@ contract SimpleVault {
 
   function getDebt(address _addr) public view returns (uint256){
     return debt[_addr];
+  }
+
+  function liquidate(address _addr) external {
+      require(bal[_addr].mul(collateralPrice).div(ltvRatio) <= 1000000000000000000, "Loan solvent");
+      /*/ calculate amount to liquidate and fee /*/
   }
 
 }
