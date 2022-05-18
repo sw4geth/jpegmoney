@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./IOracle.sol";
+
 contract SimpleVault {
 
-  constructor(address _collateral, address _stable){
+  constructor(address _collateral, address _stable, address _oracle){
     IERC20 collateral = IERC20(_collateral);
     IERC20 stablecoin = IERC20(_stable);
+    IOracle priceOracle = IOracle(_oracle);
   }
 
+  IOracle priceOracle;
   IERC20 collateral;
   IERC20 stablecoin;
+  uint oraclePrice;
+
   mapping(address => uint256) public bal;
   mapping(address => uint256) public debt;
 
@@ -32,7 +38,7 @@ contract SimpleVault {
   }
 
   function withdraw(uint256 _amount) external {
-    require(bal[msg.sender] - debt[msg.sender] <= _amount, "Pay up homeboy!");
+    require(bal[msg.sender] - debt[msg.sender] >= _amount, "Pay up homeboy!");
     collateral.transferFrom(address(this), msg.sender, _amount);
     bal[msg.sender] -= _amount;
   }
@@ -46,4 +52,9 @@ contract SimpleVault {
     return debt[_addr];
   }
 
+  /*/ oracle functions /*/
+  function getCollateralPrice() external {
+    priceOracle.update();
+    oraclePrice = priceOracle.consult();
+  }
 }
