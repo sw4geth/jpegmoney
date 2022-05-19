@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract SimpleVault {
+contract SimpleVaultMock {
   using SafeMath for uint256;
   mapping(address => uint256) public bal;
   mapping(address => uint256) public debt;

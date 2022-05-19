@@ -23,6 +23,9 @@
     "@openzeppelin/contracts": "^4.6.0",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "app": "^0.1.0",
+    "create-react": "^0.0.0",
+    "create-react-app": "^5.0.1",
     "dotenv": "^16.0.1"
   }
 }
