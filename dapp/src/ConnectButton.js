@@ -1,8 +1,10 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import {abi, contract} from './jpegmoney';
+import {punkabi, punkcontract} from './Punks';
 
-export default function ConnectButton({setAcct, setActive, active, setContract, minted, setMinted, setStarted}){
+export default function ConnectButton({setAcct, acct, setActive, active, setVault, setColPrice, colPrice, punks, setPunks, setPunkBalance, setNetworth, setDebt}){
   const providerOptions = {
       walletconnect: {
         package: WalletConnectProvider, // required
@@ -19,7 +21,7 @@ export default function ConnectButton({setAcct, setActive, active, setContract, 
     };
 
   const web3Modal = new Web3Modal({
-    network: "mainnet", // optional
+    network: "rinkeby", // optional
     cacheProvider: false, // optional
     providerOptions // required
   });
@@ -29,7 +31,21 @@ export default function ConnectButton({setAcct, setActive, active, setContract, 
     const provider = await web3Modal.connect();
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
+    const jpegmoney = new web3.eth.Contract(abi, contract);
+    const cryptopunks = new web3.eth.Contract(punkabi, punkcontract);
+    setVault(jpegmoney);
+    setPunks(cryptopunks);
+    const collatPrice = await jpegmoney.methods.getCollateralPriceUSD().call();
+    const depositBalance = await jpegmoney.methods.bal(accounts[0]).call();
+    const debt = await jpegmoney.methods.debt(accounts[0]).call();
+    setDebt(debt);
+    const nw = await jpegmoney.methods.calculateTotalUserValueUSD(accounts[0]).call();
+    setNetworth(nw);
+    const punkBalance = web3.utils.fromWei(await cryptopunks.methods.balanceOf(accounts[0]).call());
+    setPunkBalance(punkBalance);
+    setColPrice(collatPrice);
     setAcct(accounts[0]);
+    console.log(accounts[0]);
     setActive(true);
     provider.on("accountsChanged", (accounts: string[]) => {
     setAcct(accounts[0]);
@@ -54,6 +70,8 @@ export default function ConnectButton({setAcct, setActive, active, setContract, 
 
 
   return(
-    <div onClick={connect}>{active? <span>Connected</span> : <span>Connect Wallet</span>}</div>
+    <div>
+    <div className="connect" onClick={connect}>{active? <span>Connected</span> : <span>Connect</span>}</div>
+    </div>
   );
 }

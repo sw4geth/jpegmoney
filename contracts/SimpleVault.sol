@@ -12,8 +12,8 @@ contract SimpleVault {
   AggregatorV3Interface internal eth_usd_price_feed;
 
   constructor(address _collateral, address _stable, address _oracle){
-    IERC20 collateral = IERC20(_collateral);
-    IERC20 stablecoin = IERC20(_stable);
+    collateral = IERC20(_collateral);
+    stablecoin = IERC20(_stable);
     priceOracle = IOracle(_oracle);
     eth_usd_price_feed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e);
   }
@@ -27,45 +27,63 @@ contract SimpleVault {
 
   /*/ accounting logic /*/
 
-  function deposit(uint256 _amount) external {
-    collateral.transferFrom(msg.sender, address(this), _amount);
+  function deposit(uint256 _amount) public {
+    require(collateral.transferFrom(msg.sender, address(this), _amount));
     bal[msg.sender] += _amount;
+    emit collateralDeposited(_amount);
+  }
+  event collateralDeposited(uint256 amount);
+  event collateralWithdraw(uint256 amount);
+  event borrowed(uint256 amount);
+  event repayed(uint256 amount);
+
+  function withdraw(uint256 _amount) public {
+    require(bal[msg.sender] >= _amount, "Withdraw exceeds balance");
+    require(debt[msg.sender] == 0, "pay back debt");
+    require(collateral.transfer(msg.sender, _amount), "transfer failed");
+    bal[msg.sender] -= _amount;
+    emit collateralWithdraw(_amount);
   }
 
   function borrow(uint256 _amount) external {
-    require(calculateCollateralValueUSD(msg.sender) - debt[msg.sender] / 2 >= _amount, "Whoah there bud!");
+    require(calculateTotalUserValueUSD(msg.sender) >= _amount * 2, "exceeds ltv ratio");
+    require(stablecoin.transfer(msg.sender, _amount), "transfer failed");
     debt[msg.sender] += _amount;
-    stablecoin.transferFrom(address(this), msg.sender, _amount);
+    emit borrowed(_amount);
   }
 
   function repay(uint256 _amount) external {
-    stablecoin.transferFrom(msg.sender, address(this), _amount);
+    require(_amount <= debt[msg.sender]);
+    require(stablecoin.transferFrom(msg.sender, address(this), _amount));
     debt[msg.sender] -= _amount;
+    emit repayed(_amount);
   }
 
-  function withdraw(uint256 _amount) external {
-    require(calculateCollateralValueUSD(msg.sender) - debt[msg.sender] / 2 >= _amount, "Whoah there bud!");
-    bal[msg.sender] -= _amount;
-    collateral.transferFrom(address(this), msg.sender, _amount);
+  function liquidate(address _addr) external {
+    require(calculateTotalUserValueUSD(_addr) <= debt[_addr] * 2);
+    uint256 halfdebt = debt[_addr] / 2;
+    uint256 fee = bal[_addr] / 10;
+    require(stablecoin.transferFrom(msg.sender, address(this), halfdebt));
+    require(collateral.transfer(msg.sender, fee));
+    debt[_addr] -= halfdebt;
+    bal[_addr] -= fee;
   }
-
   /*/ view functions /*/
-
-  function getBalance(address _addr) public view returns (uint256){
-    return bal[_addr];
-  }
-  function getDebt(address _addr) public view returns (uint256){
-    return debt[_addr];
-  }
-
+  
   function calculateCollateralValueUSD(address _addr) public view returns (uint256) {
-    return bal[_addr] * getCollateralPriceUSD();
+    return bal[_addr] * getCollateralPriceUSD() / 10**18;
   }
-
+  function calculateTotalUserValueUSD(address _addr) public view returns (uint256) {
+    return calculateCollateralValueUSD(_addr) - debt[_addr];
+  }
   function getCollateralPriceUSD() public view returns (uint256) {
     uint256 oraclePrice = getTwap();
     uint256 ethPrice = getEthUsd();
     return ethPrice.mul(oraclePrice) / 10**18;
+  }
+
+  function estimateMaxBorrow(address _addr) public view returns(uint256) {
+    return calculateTotalUserValueUSD(_addr) / 2;
   }
 
   /*/ oracle functions /*/
