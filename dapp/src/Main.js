@@ -17,14 +17,15 @@ import Title from './DappTitle';
     const [borrowAmt, setBorrow] = useState('');
     const [netWorth, setNetworth] = useState('');
     const [debt, setDebt] = useState('');
+    const [maxBorrow, setMax] = useState('');
 
     return (
       <div>
       <Title />
-      <ConnectButton setAcct={setAcct} acct={acct} setActive={setActive} active={active} setVault={setVault} setColPrice={setColPrice} setPunks={setPunks} punks={punks} setPunkBalance={setPunkBalance} setNetworth={setNetworth} setDebt={setDebt} />
+      <ConnectButton setAcct={setAcct} acct={acct} setActive={setActive} active={active} setVault={setVault} setColPrice={setColPrice} setPunks={setPunks} punks={punks} setPunkBalance={setPunkBalance} setNetworth={setNetworth} setDebt={setDebt} setMax={setMax} />
       <User colPrice={colPrice} vault={vault} acct={acct} netWorth={netWorth} setNetworth={setNetworth} />
       <Deposit acct={acct} setDeposit={setDeposit} depositAmt={depositAmt} vault={vault} punks={punks} punkBalance={punkBalance} colPrice={colPrice}/>
-      <Borrow acct={acct} setBorrow={setBorrow} borrowAmt={borrowAmt} vault={vault} debt={debt}/>
+      <Borrow acct={acct} setBorrow={setBorrow} borrowAmt={borrowAmt} vault={vault} debt={debt} netWorth={netWorth} maxBorrow={maxBorrow} />
       <Repay />
       </div>
     );

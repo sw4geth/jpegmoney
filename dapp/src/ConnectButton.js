@@ -4,7 +4,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import {abi, contract} from './jpegmoney';
 import {punkabi, punkcontract} from './Punks';
 
-export default function ConnectButton({setAcct, acct, setActive, active, setVault, setColPrice, colPrice, punks, setPunks, setPunkBalance, setNetworth, setDebt}){
+export default function ConnectButton({setAcct, acct, setActive, active, setVault, setColPrice, colPrice, punks, setPunks, setPunkBalance, setNetworth, setDebt, setMax}){
   const providerOptions = {
       walletconnect: {
         package: WalletConnectProvider, // required
@@ -38,6 +38,8 @@ export default function ConnectButton({setAcct, acct, setActive, active, setVaul
     const collatPrice = await jpegmoney.methods.getCollateralPriceUSD().call();
     const depositBalance = await jpegmoney.methods.bal(accounts[0]).call();
     const debt = await jpegmoney.methods.debt(accounts[0]).call();
+    const max = await jpegmoney.methods.estimateMaxBorrow(accounts[0]).call();
+    setMax(max);
     setDebt(debt);
     const nw = await jpegmoney.methods.calculateTotalUserValueUSD(accounts[0]).call();
     setNetworth(nw);

@@ -1,9 +1,8 @@
 import Web3 from "web3";
 
-export default function Borrow({setBorrow, borrowAmt, vault, acct, debt}) {
+export default function Borrow({setBorrow, borrowAmt, vault, acct, debt, netWorth, maxBorrow}) {
 
   const web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/04a944092bf1448bb6ccbbae196e56f1"));
-
   const handleChange = (e) => {
     setBorrow(web3.utils.toWei(e.target.value));
   };
@@ -18,7 +17,7 @@ export default function Borrow({setBorrow, borrowAmt, vault, acct, debt}) {
     <div className="borrow">
     <div className="topdiv">
     <form>
-    <label for="borrow">Borrow $JPEGUSD.  Your debt is ${debt}</label>
+    <label for="borrow">Borrow $JPEGUSD.  Your debt is ${web3.utils.fromWei(debt)}.  You can borrow at maximum {web3.utils.fromWei(maxBorrow)} JPEGUSD.</label>
     <br>
     </br>
     <br>

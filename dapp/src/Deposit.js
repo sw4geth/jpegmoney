@@ -27,7 +27,7 @@ export default function Deposit({setDeposit, depositAmt, acct, vault, punks, pun
     <div className="deposit">
     <div className="topdiv">
     <form>
-    <label for="deposit">Deposit $PUNKS. Your balance: {punkBalance} (${punksvalue})</label>
+    <label for="deposit">Deposit $PUNK. Your balance: {punkBalance} (${punksvalue})</label>
     <br>
     </br>
     <br>
