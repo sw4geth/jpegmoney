@@ -65,11 +65,12 @@ contract SimpleVault {
     uint256 fee = bal[_addr] / 10;
     require(stablecoin.transferFrom(msg.sender, address(this), halfdebt));
     require(collateral.transfer(msg.sender, fee));
+    /*/ still need to transfer debt value of collateral to liquidator /*/
     debt[_addr] -= halfdebt;
     bal[_addr] -= fee;
   }
   /*/ view functions /*/
-  
+
   function calculateCollateralValueUSD(address _addr) public view returns (uint256) {
     return bal[_addr] * getCollateralPriceUSD() / 10**18;
   }
@@ -84,6 +85,7 @@ contract SimpleVault {
 
   function estimateMaxBorrow(address _addr) public view returns(uint256) {
     return calculateTotalUserValueUSD(_addr) / 2;
+    /*/ this should be fixed /*/
   }
 
   /*/ oracle functions /*/
